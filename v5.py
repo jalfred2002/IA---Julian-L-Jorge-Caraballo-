@@ -51,7 +51,7 @@ class MLP:
 
         # Capa de entrada a la primera capa oculta
         self.weights.append(np.random.randn(input_size, hidden_sizes[0]) * np.sqrt(2.0 / input_size))  # Inicialización He
-        self.biases.append(np.zeros((1, hidden_sizes[0]))  # Sesgos inicializados en 0
+        self.biases.append(np.zeros((1, hidden_sizes[0])))  # Sesgos inicializados en 0 (paréntesis corregidos)
 
         # Capas ocultas adicionales
         for i in range(1, len(hidden_sizes)):
