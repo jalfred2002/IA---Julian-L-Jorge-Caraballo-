@@ -20,9 +20,7 @@ def derivada_relu(x):
 # Clase MLP
 class MLP:
     def __init__(self, tamaño_entrada, tamaños_ocultos, tamaño_salida, activacion='sigmoid'):
-        """
-        Inicializa el MLP con una o más capas ocultas.
-        """
+        # Inicializa el MLP con una o más capas ocultas.
         self.tamaños_ocultos = tamaños_ocultos
         self.activacion = activacion
 
@@ -44,9 +42,7 @@ class MLP:
         self.sesgos.append(np.zeros((1, tamaño_salida)))
 
     def propagacion_adelante(self, X):
-        """
-        Propagación hacia adelante.
-        """
+        # Propagación hacia adelante.
         self.capas = [X]  # Almacena las salidas de cada capa
         for i in range(len(self.pesos)):
             entrada_capa = self.capas[-1] @ self.pesos[i] + self.sesgos[i]  # Uso de @ para multiplicación de matrices
@@ -55,9 +51,7 @@ class MLP:
         return self.capas[-1]
 
     def _aplicar_activacion(self, x):
-        """
-        Aplica la función de activación.
-        """
+        # Aplica la función de activación.
         if self.activacion == 'sigmoid':
             return sigmoid(x)
         elif self.activacion == 'relu':
@@ -66,9 +60,7 @@ class MLP:
             raise ValueError("Función de activación no soportada")
 
     def propagacion_atras(self, X, y, salida, tasa_aprendizaje, peso_clase_fraude):
-        """
-        Propagación hacia atrás y actualización de pesos, con ponderación de clases.
-        """
+        # Propagación hacia atrás y actualización de pesos, con ponderación de clases.
         # Cálculo del error en la capa de salida
         self.errores = [y - salida]
         # Ponderar el error de la clase minoritaria (fraude)
@@ -92,9 +84,7 @@ class MLP:
             self.sesgos[i] += tasa_aprendizaje * np.sum(self.deltas[i], axis=0, keepdims=True)
 
     def _aplicar_derivada_activacion(self, x):
-        """
-        Aplica la derivada de la función de activación.
-        """
+        # Aplica la derivada de la función de activación.
         if self.activacion == 'sigmoid':
             return derivada_sigmoid(x)
         elif self.activacion == 'relu':
@@ -103,9 +93,7 @@ class MLP:
             raise ValueError("Función de activación no soportada")
 
     def entrenar(self, X, y, epocas, tasa_aprendizaje, peso_clase_fraude):
-        """
-        Entrena el MLP, con ponderación de clases.
-        """
+        # Entrena el MLP, con ponderación de clases.
         self.historial_perdida = []
         for epoca in range(epocas):
             salida = self.propagacion_adelante(X)
@@ -117,16 +105,12 @@ class MLP:
                 print(f"Época {epoca}, Pérdida: {perdida}")
 
     def predecir(self, X):
-        """
-        Realiza predicciones.
-        """
+        # Realiza predicciones.
         return (self.propagacion_adelante(X) > 0.5).astype(int)  # Usar un umbral de 0.5 para clasificación binaria
 
 def dividir_entrenamiento_prueba(X, y, tamaño_prueba=0.2, semilla_aleatoria=None):
-    """
-    Divide los datos en conjuntos de entrenamiento y prueba.
-    Implementación básica sin sklearn.
-    """
+    # Divide los datos en conjuntos de entrenamiento y prueba.
+    # Implementación básica sin sklearn.
     if semilla_aleatoria is not None:
         np.random.seed(semilla_aleatoria)
 
@@ -143,9 +127,7 @@ def dividir_entrenamiento_prueba(X, y, tamaño_prueba=0.2, semilla_aleatoria=Non
 
 
 def escalar_estandar(X_entrenamiento, X_prueba):
-    """
-    Escala los datos para que tengan media 0 y desviación estándar 1.
-    """
+    # Escala los datos para que tengan media 0 y desviación estándar 1.
     media = np.mean(X_entrenamiento, axis=0)
     desviacion_estandar = np.std(X_entrenamiento, axis=0)
     X_entrenamiento_escalado = (X_entrenamiento - media) / (desviacion_estandar + 1e-8)  # Añade un pequeño valor para evitar división por cero
@@ -154,40 +136,30 @@ def escalar_estandar(X_entrenamiento, X_prueba):
 
 
 def precision_exactitud(y_verdadero, y_predicho):
-    """
-    Calcula la precisión (accuracy).
-    """
+    # Calcula la precisión (accuracy).
     predicciones_correctas = np.sum(y_verdadero == y_predicho)
     return predicciones_correctas / len(y_verdadero)
 
 def precision_precision(y_verdadero, y_predicho):
-    """
-    Calcula la precisión (precision).
-    """
+    # Calcula la precisión (precision).
     tp = np.sum((y_verdadero == 1) & (y_predicho == 1))
     fp = np.sum((y_verdadero == 0) & (y_predicho == 1))
     return tp / (tp + fp + 1e-8) # Sumar un pequeño valor para evitar la división por cero
 
 def precision_exhaustividad(y_verdadero, y_predicho):
-    """
-    Calcula la exhaustividad (recall).
-    """
+    # Calcula la exhaustividad (recall).
     tp = np.sum((y_verdadero == 1) & (y_predicho == 1))
     fn = np.sum((y_verdadero == 1) & (y_predicho == 0))
     return tp / (tp + fn + 1e-8) # Sumar un pequeño valor para evitar la división por cero
 
 def puntuacion_f1(y_verdadero, y_predicho):
-    """
-    Calcula la puntuación F1.
-    """
+    # Calcula la puntuación F1.
     precision = precision_precision(y_verdadero, y_predicho)
     exhaustividad = precision_exhaustividad(y_verdadero, y_predicho)
     return 2 * (precision * exhaustividad) / (precision + exhaustividad + 1e-8) # Sumar un pequeño valor para evitar la división por cero
 
 def matriz_confusion(y_verdadero, y_predicho):
-    """
-    Calcula la matriz de confusión.
-    """
+    # Calcula la matriz de confusión.
     etiquetas_unicas = np.unique(np.concatenate((y_verdadero, y_predicho)))
     matriz = np.zeros((len(etiquetas_unicas), len(etiquetas_unicas)), dtype=int)
     for i, etiqueta_verdadera in enumerate(etiquetas_unicas):
