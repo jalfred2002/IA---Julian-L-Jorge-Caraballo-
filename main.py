@@ -65,12 +65,14 @@ class MLP:
         else:
             raise ValueError("Función de activación no soportada")
 
-    def propagacion_atras(self, X, y, salida, tasa_aprendizaje):
+    def propagacion_atras(self, X, y, salida, tasa_aprendizaje, peso_clase_fraude):
         """
-        Propagación hacia atrás y actualización de pesos.
+        Propagación hacia atrás y actualización de pesos, con ponderación de clases.
         """
         # Cálculo del error en la capa de salida
         self.errores = [y - salida]
+        # Ponderar el error de la clase minoritaria (fraude)
+        self.errores[0][y == 1] *= peso_clase_fraude  # Aumentar el error para la clase fraude
         self.deltas = [self.errores[-1] * self._aplicar_derivada_activacion(salida)]
 
         # Propagación del error hacia atrás
@@ -100,15 +102,16 @@ class MLP:
         else:
             raise ValueError("Función de activación no soportada")
 
-    def entrenar(self, X, y, epocas, tasa_aprendizaje):
+    def entrenar(self, X, y, epocas, tasa_aprendizaje, peso_clase_fraude):
         """
-        Entrena el MLP.
+        Entrena el MLP, con ponderación de clases.
         """
         self.historial_perdida = []
         for epoca in range(epocas):
             salida = self.propagacion_adelante(X)
-            self.propagacion_atras(X, y, salida, tasa_aprendizaje)
-            perdida = -np.mean(y * np.log(salida + 1e-10) + (1 - y) * np.log(1 - salida + 1e-10))  # Pérdida de entropía cruzada binaria
+            self.propagacion_atras(X, y, salida, tasa_aprendizaje, peso_clase_fraude)
+            #La pérdida de entropía cruzada binaria NO se ve afectada para poder ver la pérdida real sin ponderar
+            perdida = -np.mean(y * np.log(salida + 1e-10) + (1 - y) * np.log(1 - salida + 1e-10))
             self.historial_perdida.append(perdida)
             if epoca % 100 == 0:
                 print(f"Época {epoca}, Pérdida: {perdida}")
@@ -220,11 +223,16 @@ try:
     epocas = 1000  # Número de épocas de entrenamiento
     tasa_aprendizaje = 0.001  # Tasa de aprendizaje
 
+    # Calcular el peso para la clase fraudulenta
+    num_fraudes = np.sum(y_entrenamiento == 1)
+    num_total = len(y_entrenamiento)
+    peso_clase_fraude = num_total / (2 * num_fraudes)  # Peso inversamente proporcional a la frecuencia
+
     # Inicializar el MLP
     mlp = MLP(tamaño_entrada, tamaños_ocultos, tamaño_salida, activacion='relu')
 
-    # Entrenar el MLP
-    mlp.entrenar(X_entrenamiento_escalado, y_entrenamiento.reshape(-1, 1), epocas, tasa_aprendizaje)
+    # Entrenar el MLP, pasando el peso de la clase fraudulenta
+    mlp.entrenar(X_entrenamiento_escalado, y_entrenamiento.reshape(-1, 1), epocas, tasa_aprendizaje, peso_clase_fraude)
 
     # Hacer predicciones en el conjunto de PRUEBA
     predicciones = mlp.predecir(X_prueba_escalado)
