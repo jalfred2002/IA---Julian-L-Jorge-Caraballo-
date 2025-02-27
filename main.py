@@ -110,7 +110,6 @@ class MLP:
 
 def dividir_entrenamiento_prueba(X, y, tamaño_prueba=0.2, semilla_aleatoria=None):
     # Divide los datos en conjuntos de entrenamiento y prueba.
-    # Implementación básica sin sklearn.
     if semilla_aleatoria is not None:
         np.random.seed(semilla_aleatoria)
 
